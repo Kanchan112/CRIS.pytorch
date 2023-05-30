@@ -166,3 +166,4 @@ wandb/
 *.pt
 *.jpg
 *.png
+.vscode/
