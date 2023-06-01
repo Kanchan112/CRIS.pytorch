@@ -167,3 +167,6 @@ wandb/
 *.jpg
 *.png
 .vscode/
+
+/test.sh
+/finetune.sh

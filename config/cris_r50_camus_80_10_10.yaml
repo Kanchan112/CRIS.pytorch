@@ -1,0 +1,58 @@
+DATA:
+  dataset:  camus_80_10_10 #dataset name
+  train_lmdb: /mnt/Enterprise/rabin/VLM-SEG-2023/CRIS.pytorch/datasets/lmdb/camus_80_10_10/train.lmdb #path to train.lmdb for the dataset
+  train_split: train
+  val_lmdb: /mnt/Enterprise/rabin/VLM-SEG-2023/CRIS.pytorch/datasets/lmdb/camus_80_10_10/val.lmdb #path to val.lmdb for the dataset
+  val_split: val
+  mask_root: /mnt/Enterprise/rabin/VLM-SEG-2023/CRIS.pytorch/datasets/masks/camus_80_10_10/ #path to masks for the dataset
+TRAIN:
+  # Base Arch
+  clip_pretrain: pretrain/RN50.pt
+  input_size: 416
+  word_len: 17
+  word_dim: 1024
+  vis_dim: 512
+  fpn_in: [512, 1024, 1024]
+  fpn_out: [256, 512, 1024]
+  sync_bn: True
+  # Decoder
+  num_layers: 3
+  num_head: 8
+  dim_ffn: 2048
+  dropout: 0.2
+  intermediate: False
+  # Training Setting
+  workers: 16 # data loader workers
+  workers_val: 16
+  epochs: 150
+  milestones: [120]
+  start_epoch: 0
+  batch_size: 16  # batch size for training
+  batch_size_val: 16 # batch size for validation during training, memory and speed tradeoff
+  base_lr: 0.0001
+  lr_decay: 0.1
+  lr_multi: 0.1
+  weight_decay: 0.01
+  max_norm: 0.
+  manual_seed: 0
+  print_freq: 1
+  prompt_type: p0 # one of p0, ..., p1
+  # Resume & Save
+  exp_name: CRIS_R50
+  output_folder: exp/camus_80_10_10_p0_i #path to logs and checkpoints, preparbly in exp\{dataset}_{prmopt_type}_fn for finetuning exp\{dataset}_{prmopt_type}_i for inference
+  save_freq: 1
+  weight:  # path to initial weight (default: none)
+  resume: pretrain/cris_best.pth # path to latest checkpoint (default: none)
+  resume_optimizer: True #restores optimizer state while loading checkpoint
+  resume_scheduler: True #restores scheduler state while loading checkpoint
+  evaluate: True  # evaluate on validation set, extra gpu memory needed and small batch_size_val is recommend
+Distributed:
+  dist_url: tcp://localhost:3681
+  dist_backend: 'nccl'
+  multiprocessing_distributed: True
+  world_size: 1
+  rank: 0
+TEST:
+  test_split: val-test
+  test_lmdb: datasets/lmdb/kvasir_polyp_80_10_10/val.lmdb
+  visualize: True

@@ -74,8 +74,7 @@ def main():
     model = torch.nn.DataParallel(model).cuda()
     logger.info(model)
 
-    # args.model_dir = os.path.join(args.output_dir, "cris_best.pth")
-    args.model_dir = os.path.join("exp_old/kvasir_polyp_test/CRIS_R50", "cris_best.pth")
+    args.model_dir = os.path.join("pretrain", "cris_best.pth")
     if os.path.isfile(args.model_dir):
         logger.info("=> loading checkpoint '{}'".format(args.model_dir))
         checkpoint = torch.load(args.model_dir)

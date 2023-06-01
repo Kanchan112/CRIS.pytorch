@@ -175,7 +175,10 @@ def inference(test_loader, model, args):
         mask = cv2.imread(param["mask_dir"][0], flags=cv2.IMREAD_GRAYSCALE)
         # dump image & mask
         if args.visualize:
-            seg_id = param["seg_id"][0].cpu().numpy()
+            mask_name = param["mask_name"][0]
+
+            seg_id, ext = os.path.splitext(mask_name)
+
             img_name = "{}-img.jpg".format(seg_id)
             mask_name = "{}-mask.png".format(seg_id)
             cv2.imwrite(

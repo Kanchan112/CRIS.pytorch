@@ -51,19 +51,13 @@ def folder2lmdb(json_data, img_dir, mask_dir, output_dir, split, write_frequency
     txn = db.begin(write=True)
     tbar = tqdm(json_data)
     for idx, item in enumerate(tbar):
-        img = raw_reader(osp.join(img_dir, item["img_name"]))
-        mask = raw_reader(osp.join(mask_dir, f"{item['segment_id']}.png"))
-        data = {
-            "img": img,
-            "mask": mask,
-            "cat": item["cat"],
-            "seg_id": item["segment_id"],
-            "img_name": item["img_name"],
-            "num_sents": item["sentences_num"],
-            "sents": [i["sent"] for i in item["sentences"]],
-            "prompts": item["prompts"],  # edited
-        }
-        txn.put("{}".format(idx).encode("ascii"), dumps_pyarrow(data))
+        img = raw_reader(osp.join(img_dir, item['img_name']))
+        mask = raw_reader(osp.join(mask_dir, item['mask_name']))
+        data = {'img': img, 'mask': mask, 'cat': item['cat'],
+                'mask_name': item['mask_name'], 'img_name': item['img_name'],
+                'num_sents': item['sentences_num'], 'sents': [i['sent'] for i in item['sentences']],
+            "prompts": item["prompts"]}  # edited
+        txn.put(u'{}'.format(idx).encode('ascii'), dumps_pyarrow(data))
         if idx % write_frequency == 0:
             # print("[%d/%d]" % (idx, len(data_loader)))
             txn.commit()
