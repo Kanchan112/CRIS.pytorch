@@ -124,7 +124,9 @@ def validate(val_loader, model, epoch, args, train_iou, train_loss):
             )
             pred = np.array(pred > 0.35)
             mask = cv2.imread(mask_dir, flags=cv2.IMREAD_GRAYSCALE)
-            mask = mask / 255.0
+            #resize       
+            if args.resize:
+                mask = cv2.resize(mask, (224, 224))    mask = mask / 255.0
             # iou
             inter = np.logical_and(pred, mask)
             union = np.logical_or(pred, mask)
@@ -173,6 +175,10 @@ def inference(test_loader, model, args):
         # data
         img = img.cuda(non_blocking=True)
         mask = cv2.imread(param["mask_dir"][0], flags=cv2.IMREAD_GRAYSCALE)
+        #resize
+        h_, w_ = mask.shape
+        if args.resize:
+            mask = cv2.resize(mask, (224, 224))
         # dump image & mask
         if args.visualize:
             mask_name = param["mask_name"][0]
@@ -181,10 +187,14 @@ def inference(test_loader, model, args):
 
             img_name = "{}-img.jpg".format(seg_id)
             mask_name = "{}-mask.png".format(seg_id)
+            if args.resize:
+                img_param = cv2.resize(param["ori_img"][0].cpu().numpy(), (h_, w_))
             cv2.imwrite(
                 filename=os.path.join(args.vis_dir, img_name),
                 img=param["ori_img"][0].cpu().numpy(),
             )
+            if args.resize:
+                mask = cv2.resize(mask, (h_, w_))   
             cv2.imwrite(filename=os.path.join(args.vis_dir, mask_name), img=mask)
             cv2.imwrite(
                 filename=os.path.join(args.gt_dir, "{}.png".format(seg_id)), img=mask
