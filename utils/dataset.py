@@ -39,12 +39,8 @@ info = {
     "cvccolondb_polyp_51_0_949": {"train": 0, "val": 20, "testA": 360, "testB": 360},
     "etis_polyp_10_0_90": {"train": 0, "val": 20, "testA": 176, "testB": 176},
     "isic_skin_90_10_d": {"train": 800, "val": 100, "testA": 379, "testB": 379},
-    'camus_80_10_10': {
-        'train': 4320,
-        'val': 540,
-        'testA': 540,
-        'testB': 540
-    }
+    "camus_80_10_10": {"train": 4320, "val": 540, "testA": 540, "testB": 540},
+    "chexlocalize_no_train": {"train": 0, "val": 0, "testA": 1534, "testB": 1534},
 }
 _tokenizer = _Tokenizer()
 
@@ -155,7 +151,7 @@ class RefDataset(Dataset):
         img = cv2.cvtColor(ori_img, cv2.COLOR_BGR2RGB)
         img_size = img.shape[:2]
         # mask
-        mask_name = ref['mask_name']
+        mask_name = ref["mask_name"]
         mask_dir = os.path.join(self.mask_dir, mask_name)
         # sentences
         # idx = np.random.choice(ref["num_sents"])
@@ -217,12 +213,12 @@ class RefDataset(Dataset):
             # sentence -> vector
             img = self.convert(img)[0]
             params = {
-                'ori_img': ori_img,
-                'mask_name': mask_name,
-                'mask_dir': mask_dir,
-                'inverse': mat_inv,
-                'ori_size': np.array(img_size),
-                'sents': sents
+                "ori_img": ori_img,
+                "mask_name": mask_name,
+                "mask_dir": mask_dir,
+                "inverse": mat_inv,
+                "ori_size": np.array(img_size),
+                "sents": sents,
             }
             return img, params
 
