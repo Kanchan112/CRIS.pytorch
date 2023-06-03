@@ -1,0 +1,60 @@
+DATA:
+  dataset: #dataset name
+  train_lmdb: #path to train.lmdb for the dataset
+  train_split: train
+  val_lmdb: #path to val.lmdb for the dataset
+  val_split: val
+  mask_root: #path to masks for the dataset
+TRAIN:
+  # Base Arch
+  clip_pretrain: pretrain/RN50.pt
+  input_size: 416
+  word_len: 17
+  word_dim: 1024
+  vis_dim: 512
+  fpn_in: [512, 1024, 1024]
+  fpn_out: [256, 512, 1024]
+  sync_bn: True
+  # Decoder
+  num_layers: 3
+  num_head: 8
+  dim_ffn: 2048
+  dropout: 0.2
+  intermediate: False
+  # Training Setting
+  workers: 8 # data loader workers
+  workers_val: 8
+  epochs: 100
+  milestones: [100]
+  start_epoch: 0
+  batch_size: 16  # batch size for training
+  batch_size_val: 16 # batch size for validation during training, memory and speed tradeoff
+  base_lr: 0.0001
+  lr_decay: 0.1
+  lr_multi: 0.1
+  weight_decay: 0.01
+  max_norm: 0.
+  manual_seed: 0
+  print_freq: 1
+  prompt_type: # one of p0, ..., p1
+  resize: False
+  log_model: False
+  # Resume & Save
+  exp_name: CRIS_R50
+  output_folder: #path to logs and checkpoints, preparbly in exp\{dataset}_{prmopt_type}_fn for finetuning exp\{dataset}_{prmopt_type}_i for inference
+  save_freq: 1
+  weight:  # path to initial weight (default: none)
+  resume: pretrain/cris_best.pth # path to latest checkpoint (default: none)
+  resume_optimizer: True #restores optimizer state while loading checkpoint
+  resume_scheduler: True #restores scheduler state while loading checkpoint
+  evaluate: True  # evaluate on validation set, extra gpu memory needed and small batch_size_val is recommend
+Distributed:
+  dist_url: tcp://localhost:3681
+  dist_backend: 'nccl'
+  multiprocessing_distributed: True
+  world_size: 1
+  rank: 0
+TEST:
+  test_split: val-test
+  test_lmdb: datasets/lmdb/kvasir_polyp_80_10_10/val.lmdb
+  visualize: True

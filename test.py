@@ -64,6 +64,7 @@ def main():
         input_size=args.input_size,
         word_length=args.word_len,
         prompt_type=args.prompt_type,
+        resize=args.resize,
     )
     test_loader = torch.utils.data.DataLoader(
         test_data, batch_size=1, shuffle=False, num_workers=1, pin_memory=True
@@ -72,7 +73,8 @@ def main():
     # build model
     model, _ = build_segmenter(args)
     model = torch.nn.DataParallel(model).cuda()
-    logger.info(model)
+    if args.log_model:
+        logger.info(model)
 
     args.model_dir = os.path.join("pretrain", "cris_best.pth")
     if os.path.isfile(args.model_dir):

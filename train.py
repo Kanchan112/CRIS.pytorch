@@ -99,14 +99,16 @@ def main_worker(gpu, args):
     model, param_list = build_segmenter(args)
     if args.sync_bn:
         model = nn.SyncBatchNorm.convert_sync_batchnorm(model)
-    logger.info(model)
-    logger.info(args)
+
+    if args.log_model:
+        logger.info(model)
+        logger.info(args)
+
     model = nn.parallel.DistributedDataParallel(
         model.cuda(), device_ids=[args.gpu], find_unused_parameters=True
     )
 
     # build optimizer & lr scheduler
-    print(f"*******************************{args.base_lr}********************")
     optimizer = torch.optim.Adam(
         param_list, lr=args.base_lr, weight_decay=args.weight_decay
     )
@@ -126,6 +128,7 @@ def main_worker(gpu, args):
         input_size=args.input_size,
         word_length=args.word_len,
         prompt_type=args.prompt_type,
+        resize=args.resize,
     )
     val_data = RefDataset(
         lmdb_dir=args.val_lmdb,
@@ -136,6 +139,7 @@ def main_worker(gpu, args):
         input_size=args.input_size,
         word_length=args.word_len,
         prompt_type=args.prompt_type,
+        resize=args.resize,
     )
 
     # build dataloader
@@ -165,6 +169,7 @@ def main_worker(gpu, args):
     )
 
     best_IoU = 0.0
+
     # resume
     if args.resume:
         if os.path.isfile(args.resume):
@@ -175,8 +180,11 @@ def main_worker(gpu, args):
             args.start_epoch = checkpoint["epoch"]
             best_IoU = checkpoint["best_iou"]
             model.load_state_dict(checkpoint["state_dict"])
-            optimizer.load_state_dict(checkpoint["optimizer"])
-            scheduler.load_state_dict(checkpoint["scheduler"])
+
+            if args.resume_optimizer:
+                optimizer.load_state_dict(checkpoint["optimizer"])
+            if args.resume_scheduler:
+                scheduler.load_state_dict(checkpoint["scheduler"])
             logger.info(
                 "=> loaded checkpoint '{}' (epoch {})".format(
                     args.resume, checkpoint["epoch"]
@@ -189,7 +197,9 @@ def main_worker(gpu, args):
                 )
             )
 
-    # start training
+    if args.log_model:
+        logger.info(optimizer.state_dict)
+        logger.info("######'=", scheduler.state_dict.__dict__)
     start_time = time.time()
 
     for epoch in range(args.start_epoch, args.epochs):
