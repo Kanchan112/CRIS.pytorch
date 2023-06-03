@@ -107,6 +107,7 @@ class RefDataset(Dataset):
         input_size,
         word_length,
         prompt_type,
+        resize,
     ):
         super(RefDataset, self).__init__()
         self.lmdb_dir = lmdb_dir
@@ -121,6 +122,7 @@ class RefDataset(Dataset):
         self.length = info[dataset][split]
         self.env = None
         self.prompt_type = prompt_type
+        self.resize = resize
 
     def _init_db(self):
         self.env = lmdb.open(
@@ -149,6 +151,8 @@ class RefDataset(Dataset):
         # img
         ori_img = cv2.imdecode(np.frombuffer(ref["img"], np.uint8), cv2.IMREAD_COLOR)
         img = cv2.cvtColor(ori_img, cv2.COLOR_BGR2RGB)
+        if self.resize:
+            img = cv2.resize(img, (224, 224))
         img_size = img.shape[:2]
         # mask
         mask_name = ref["mask_name"]
@@ -169,10 +173,11 @@ class RefDataset(Dataset):
             # if type(sents) != list:
             #    sents = list(sents)
         else:
-            sents = list(str(ref["prompts"][f"{self.prompt_type}"]))  # edited
+            sents = [str(ref["prompts"][f"{self.prompt_type}"])]  # edited
             if len(sents) == 0:  # edited
                 sents = [""]  # edited
             # print(ref["prompts"][f"{self.prompt_type}"] == "")  # edited
+        sents = ["abc", "def", "ccc"]
         idx = np.random.choice([i for i in range(len(sents))])
         # transform
         mat, mat_inv = self.getTransformMat(img_size, True)
@@ -183,24 +188,28 @@ class RefDataset(Dataset):
             flags=cv2.INTER_CUBIC,
             borderValue=[0.48145466 * 255, 0.4578275 * 255, 0.40821073 * 255],
         )
-        # print(sents)
+
         if self.mode == "train":
             # mask transform
             mask = cv2.imdecode(
                 np.frombuffer(ref["mask"], np.uint8), cv2.IMREAD_GRAYSCALE
             )
+            if self.resize:
+                mask = cv2.resize(mask, (224, 224))
             mask = cv2.warpAffine(
                 mask, mat, self.input_size, flags=cv2.INTER_LINEAR, borderValue=0.0
             )
             mask = mask / 255.0
             # sentence -> vector
             sent = sents[idx]
+            print(sent)
             word_vec = tokenize(sent, self.word_length, True).squeeze(0)
             img, mask = self.convert(img, mask)
             return img, word_vec, mask
         elif self.mode == "val":
             # sentence -> vector
             sent = sents[0]
+            print("val", sent)
             word_vec = tokenize(sent, self.word_length, True).squeeze(0)
             img = self.convert(img)[0]
             params = {
