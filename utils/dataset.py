@@ -177,7 +177,7 @@ class RefDataset(Dataset):
             if len(sents) == 0:  # edited
                 sents = [""]  # edited
             # print(ref["prompts"][f"{self.prompt_type}"] == "")  # edited
-        sents = ["abc", "def", "ccc"]
+        
         idx = np.random.choice([i for i in range(len(sents))])
         # transform
         mat, mat_inv = self.getTransformMat(img_size, True)
