@@ -89,7 +89,7 @@ def main_worker(gpu, args):
             job_type="training",
             mode="online",
             config=args,
-            project="VLM-SEG-CRIS",
+            project="VLM-SEG-CRIS-HEAD-ONLY",
             name=args.exp_name + "_" + args.output_folder + "_" + args.prompt_type,
             tags=[args.dataset, args.clip_pretrain],
         )
@@ -153,7 +153,7 @@ def main_worker(gpu, args):
         batch_size=args.batch_size,
         shuffle=False,
         num_workers=args.workers,
-        pin_memory=True,
+        pin_memory=False,
         worker_init_fn=init_fn,
         sampler=train_sampler,
         drop_last=True,
@@ -163,7 +163,7 @@ def main_worker(gpu, args):
         batch_size=args.batch_size_val,
         shuffle=False,
         num_workers=args.workers_val,
-        pin_memory=True,
+        pin_memory=False,
         sampler=val_sampler,
         drop_last=False,
     )

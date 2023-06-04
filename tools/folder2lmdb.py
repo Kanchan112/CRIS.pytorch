@@ -3,10 +3,11 @@ import json
 import os
 import os.path as osp
 import warnings
-
+import io
 import lmdb
 import pyarrow as pa
 from tqdm import tqdm
+from PIL import Image
 
 warnings.filterwarnings("ignore")
 
@@ -34,7 +35,7 @@ def dumps_pyarrow(obj):
     return pa.serialize(obj).to_buffer()
 
 
-def folder2lmdb(json_data, img_dir, mask_dir, output_dir, split, write_frequency=1000):
+def folder2lmdb(json_data, img_dir, mask_dir, output_dir, split, write_frequency=1000, resize=352):
     lmdb_path = osp.join(output_dir, "%s.lmdb" % split)
     isdir = os.path.isdir(lmdb_path)
 
@@ -53,6 +54,20 @@ def folder2lmdb(json_data, img_dir, mask_dir, output_dir, split, write_frequency
     for idx, item in enumerate(tbar):
         img = raw_reader(osp.join(img_dir, item['img_name']))
         mask = raw_reader(osp.join(mask_dir, item['mask_name']))
+
+        if resize:
+            h, w = resize, resize
+            im_resize = Image.open(io.BytesIO(img)).resize((h,w))
+            im_buf = io.BytesIO()
+            im_resize.save(im_buf, format = 'JPEG')
+            img = im_buf.getvalue()
+
+            msk_resize = Image.open(io.BytesIO(mask)).resize((h,w))
+            msk_buf = io.BytesIO()
+            msk_resize.save(msk_buf, format = 'JPEG')
+            mask = msk_buf.getvalue()
+
+        print(type(img), type(mask))
         data = {'img': img, 'mask': mask, 'cat': item['cat'],
                 'mask_name': item['mask_name'], 'img_name': item['img_name'],
                 'num_sents': item['sentences_num'], 'sents': [i['sent'] for i in item['sentences']],

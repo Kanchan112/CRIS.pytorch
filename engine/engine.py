@@ -42,6 +42,8 @@ def train(
     # size_list = [320, 352, 384, 416, 448, 480, 512]
     # idx = np.random.choice(len(size_list))
     # new_size = size_list[idx]
+    #gradacc
+    grad_acc_step = 8
 
     for i, (image, text, target) in enumerate(train_loader):
         data_time.update(time.time() - end)
@@ -58,12 +60,14 @@ def train(
             pred, target, loss = model(image, text, target)
 
         # backward
-        optimizer.zero_grad()
-        scaler.scale(loss).backward()
-        if args.max_norm:
-            torch.nn.utils.clip_grad_norm_(model.parameters(), args.max_norm)
-        scaler.step(optimizer)
-        scaler.update()
+        #gradacc
+        if (i+1) % grad_acc_step == 0:
+            optimizer.zero_grad()
+            scaler.scale(loss).backward()
+            if args.max_norm:
+                torch.nn.utils.clip_grad_norm_(model.parameters(), args.max_norm)
+            scaler.step(optimizer)
+            scaler.update()
 
         # metric
         iou, pr5 = trainMetricGPU(pred, target, 0.35, 0.5)
@@ -108,6 +112,7 @@ def validate(val_loader, model, epoch, args, train_iou, train_loss):
         # inference
         preds = model(imgs, texts)
         preds = torch.sigmoid(preds)
+        
         if preds.shape[-2:] != imgs.shape[-2:]:
             preds = F.interpolate(
                 preds, size=imgs.shape[-2:], mode="bicubic", align_corners=True
@@ -126,7 +131,7 @@ def validate(val_loader, model, epoch, args, train_iou, train_loss):
             mask = cv2.imread(mask_dir, flags=cv2.IMREAD_GRAYSCALE)
             # resize
             if args.resize:
-                mask = cv2.resize(mask, (224, 224))
+                mask = cv2.resize(mask, (352, 352))
                 mask = mask / 255.0
             # iou
 
@@ -180,7 +185,7 @@ def inference(test_loader, model, args):
         # resize
         h_, w_ = mask.shape
         if args.resize:
-            mask = cv2.resize(mask, (224, 224))
+            mask = cv2.resize(mask, (352, 352))
         # dump image & mask
         if args.visualize:
             mask_name = param["mask_name"][0]
