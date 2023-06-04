@@ -132,7 +132,7 @@ def validate(val_loader, model, epoch, args, train_iou, train_loss):
             # resize
             if args.resize:
                 mask = cv2.resize(mask, (352, 352))
-                mask = mask / 255.0
+            mask = mask / 255.0
             # iou
 
             inter = np.logical_and(pred, mask)
@@ -184,8 +184,10 @@ def inference(test_loader, model, args):
         mask = cv2.imread(param["mask_dir"][0], flags=cv2.IMREAD_GRAYSCALE)
         # resize
         h_, w_ = mask.shape
-        if args.resize:
-            mask = cv2.resize(mask, (352, 352))
+        print(h_, w_)
+        
+        # if args.resize:
+        #     mask = cv2.resize(mask, (352, 352))
         # dump image & mask
         if args.visualize:
             mask_name = param["mask_name"][0]
@@ -194,14 +196,15 @@ def inference(test_loader, model, args):
 
             img_name = "{}-img.jpg".format(seg_id)
             mask_name = "{}-mask.png".format(seg_id)
+
+            img_param = param["ori_img"][0].cpu().numpy()
             if args.resize:
-                img_param = cv2.resize(param["ori_img"][0].cpu().numpy(), (h_, w_))
+                img_param = cv2.resize(param["ori_img"][0].cpu().numpy(), (w_, h_))
             cv2.imwrite(
                 filename=os.path.join(args.vis_dir, img_name),
-                img=param["ori_img"][0].cpu().numpy(),
+                img=img_param,
             )
-            if args.resize:
-                mask = cv2.resize(mask, (h_, w_))
+
             cv2.imwrite(filename=os.path.join(args.vis_dir, mask_name), img=mask)
             cv2.imwrite(
                 filename=os.path.join(args.gt_dir, "{}.png".format(seg_id)), img=mask
@@ -222,11 +225,14 @@ def inference(test_loader, model, args):
             h, w = param["ori_size"].numpy()[0]
             mat = param["inverse"].numpy()[0]
             pred = pred.cpu().numpy()
+            print(h, w)
             pred = cv2.warpAffine(
                 pred, mat, (w, h), flags=cv2.INTER_CUBIC, borderValue=0.0
             )
             pred = np.array(pred > 0.35)
             # iou
+            if args.resize:
+                mask = cv2.resize(mask, (w, h))           
             inter = np.logical_and(pred, mask)
             union = np.logical_or(pred, mask)
             iou = np.sum(inter) / (np.sum(union) + 1e-6)
@@ -236,6 +242,8 @@ def inference(test_loader, model, args):
                 pred = np.array(pred * 255, dtype=np.uint8)
                 sent = "_".join(sent[0].split(" "))
                 pred_name = "{}-iou={:.2f}-{}.png".format(seg_id, iou * 100, sent)
+                if args.resize:
+                    pred = cv2.resize(pred, (w_, h_))
                 cv2.imwrite(filename=os.path.join(args.vis_dir, pred_name), img=pred)
                 cv2.imwrite(
                     filename=os.path.join(args.pred_dir, "{}.png".format(seg_id)),

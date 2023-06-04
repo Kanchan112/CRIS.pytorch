@@ -41,6 +41,8 @@ info = {
     "isic_skin_90_10_d": {"train": 800, "val": 100, "testA": 379, "testB": 379},
     "camus_80_10_10": {"train": 4320, "val": 540, "testA": 540, "testB": 540},
     "chexlocalize_no_train": {"train": 0, "val": 0, "testA": 1534, "testB": 1534},
+    "isic_90_10_d": {"train": 810, "val":90, "testA":379, "testB":379},
+    "dfu-2022_80_10_10": {"train": 1600, "val":200, "testA":200, "testB":200},
 }
 _tokenizer = _Tokenizer()
 
@@ -151,8 +153,9 @@ class RefDataset(Dataset):
         # img
         ori_img = cv2.imdecode(np.frombuffer(ref["img"], np.uint8), cv2.IMREAD_COLOR)
         img = cv2.cvtColor(ori_img, cv2.COLOR_BGR2RGB)
-        if self.resize:
-            img = cv2.resize(img, (224, 224))
+
+        # if self.resize:
+        #     img = cv2.resize(img, (352, 352))
         img_size = img.shape[:2]
         # mask
         mask_name = ref["mask_name"]
@@ -195,21 +198,20 @@ class RefDataset(Dataset):
                 np.frombuffer(ref["mask"], np.uint8), cv2.IMREAD_GRAYSCALE
             )
             if self.resize:
-                mask = cv2.resize(mask, (224, 224))
+                mask = cv2.resize(mask, (352, 352))
             mask = cv2.warpAffine(
                 mask, mat, self.input_size, flags=cv2.INTER_LINEAR, borderValue=0.0
             )
             mask = mask / 255.0
             # sentence -> vector
             sent = sents[idx]
-            print(sent)
+            
             word_vec = tokenize(sent, self.word_length, True).squeeze(0)
             img, mask = self.convert(img, mask)
             return img, word_vec, mask
         elif self.mode == "val":
             # sentence -> vector
             sent = sents[0]
-            print("val", sent)
             word_vec = tokenize(sent, self.word_length, True).squeeze(0)
             img = self.convert(img)[0]
             params = {

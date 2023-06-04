@@ -35,7 +35,7 @@ def dumps_pyarrow(obj):
     return pa.serialize(obj).to_buffer()
 
 
-def folder2lmdb(json_data, img_dir, mask_dir, output_dir, split, write_frequency=1000, resize=352):
+def folder2lmdb(json_data, img_dir, mask_dir, output_dir, split,resize=352, write_frequency=1000):
     lmdb_path = osp.join(output_dir, "%s.lmdb" % split)
     isdir = os.path.isdir(lmdb_path)
 
@@ -111,6 +111,9 @@ def parse_args():
     parser.add_argument(
         "-s", "--split", type=str, default="train", help="the split type."
     )
+    parser.add_argument(
+        "-rs", "--resize", type=int, default=0, help="the dim if resize else 0."
+    )
     args = parser.parse_args()
     return args
 
@@ -123,4 +126,4 @@ if __name__ == "__main__":
     with open(args.json_dir, "rb") as f:
         json_data = json.load(f)
 
-    folder2lmdb(json_data, args.img_dir, args.mask_dir, args.output_dir, args.split)
+    folder2lmdb(json_data, args.img_dir, args.mask_dir, args.output_dir, args.split, args.resize)
