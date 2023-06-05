@@ -40,7 +40,7 @@ info = {
     "etis_polyp_10_0_90": {"train": 0, "val": 20, "testA": 176, "testB": 176},
     "isic_skin_90_10_d": {"train": 800, "val": 100, "testA": 379, "testB": 379},
     "camus_80_10_10": {"train": 4320, "val": 540, "testA": 540, "testB": 540},
-    "chexlocalize_no_train": {"train": 0, "val": 0, "testA": 1534, "testB": 1534},
+    "chexlocalize_no_train": {"train": 1330, "val": 420, "testA": 427, "testB": 427},
 }
 _tokenizer = _Tokenizer()
 
@@ -177,7 +177,7 @@ class RefDataset(Dataset):
             if len(sents) == 0:  # edited
                 sents = [""]  # edited
             # print(ref["prompts"][f"{self.prompt_type}"] == "")  # edited
-        
+
         idx = np.random.choice([i for i in range(len(sents))])
         # transform
         mat, mat_inv = self.getTransformMat(img_size, True)
