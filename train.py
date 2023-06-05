@@ -202,6 +202,9 @@ def main_worker(gpu, args):
         logger.info("######'=", scheduler.state_dict.__dict__)
     start_time = time.time()
 
+    no_improv_count = 0
+    patience = 10
+
     for epoch in range(args.start_epoch, args.epochs):
         epoch_log = epoch + 1
 
@@ -243,6 +246,14 @@ def main_worker(gpu, args):
                 best_IoU = iou
                 bestname = os.path.join(args.output_dir, "best_model.pth")
                 shutil.copyfile(lastname, bestname)
+
+        if no_improv_count >= patience:
+            break
+
+        if iou < best_IoU:
+            no_improv_count += 1
+        else:
+            no_improv_count = 0
 
         # update lr
         scheduler.step(epoch_log)
