@@ -42,7 +42,7 @@ def set_random_seed(seed, deterministic=False):
         torch.backends.cudnn.benchmark = False
 
 
-@torch.no_grad()
+@torch.inference_mode()
 def concat_all_gather(tensor):
     """
     Performs all_gather operation on the provided tensors.

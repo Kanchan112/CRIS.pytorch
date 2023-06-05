@@ -1,5 +1,10 @@
+import torch
+
 from .segmenter import CRIS
 from loguru import logger
+
+# Use tensor cores, whenever possible
+torch.set_float32_matmul_precision("medium")
 
 # def build_segmenter(args):
 #     model = CRIS(args)
