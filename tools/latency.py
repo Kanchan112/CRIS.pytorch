@@ -56,7 +56,7 @@ def main():
     # record initial gpu memory
     mem = torch.cuda.max_memory_allocated()
 
-    with torch.no_grad():
+    with torch.inference_mode():
         for i in range(500):
             start_time = time.time()
             _ = model(image, text)

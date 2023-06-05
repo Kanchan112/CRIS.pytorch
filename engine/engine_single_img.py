@@ -48,7 +48,7 @@ def convert(img, mask=None):
     return img, mask
 
 
-@torch.no_grad()
+@torch.inference_mode()
 def inference(img_path, txt, model, args):
 
     model.eval()

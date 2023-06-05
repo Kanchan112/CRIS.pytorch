@@ -96,7 +96,7 @@ def train(
     return iou_meter.val, loss_meter.val
 
 
-@torch.no_grad()
+@torch.inference_mode()
 def validate(val_loader, model, epoch, args, train_iou, train_loss):
     iou_list = []
     model.eval()
@@ -167,7 +167,7 @@ def validate(val_loader, model, epoch, args, train_iou, train_loss):
     return iou.item(), prec
 
 
-@torch.no_grad()
+@torch.inference_mode()
 def inference(test_loader, model, args):
     iou_list = []
     tbar = tqdm(test_loader, desc="Inference:", ncols=100)
