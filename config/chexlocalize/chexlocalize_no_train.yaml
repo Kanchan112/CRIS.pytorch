@@ -2,7 +2,7 @@ DATA:
   dataset: chexlocalize_no_train
   train_lmdb: datasets/lmdb/chexlocalize_no_train/train.lmdb
   train_split: train
-  val_lmdb: datasets/lmdb/chexlocalize_no_train/testA.lmdb
+  val_lmdb: datasets/lmdb/chexlocalize_no_train/val.lmdb
   val_split: val
   mask_root: datasets/masks/chexlocalize_no_train
 TRAIN:
@@ -36,14 +36,16 @@ TRAIN:
   max_norm: 0.
   manual_seed: 0
   print_freq: 100
-  prompt_type: p0
+  prompt_type: p1
   # Resume & Save
   exp_name: CRIS_R50
-  output_folder: exp/chexlocalize_no_train_p0
+  output_folder: exp/chexlocalize_no_train_p1
   save_freq: 1
-  weight:  # path to initial weight (default: none)
+  weight: # path to initial weight (default: none)
   resume: pretrain/cris_best.pth # path to latest checkpoint (default: none)
   evaluate: True  # evaluate on validation set, extra gpu memory needed and small batch_size_val is recommend
+  resize: False
+  log_model: False
 Distributed:
   dist_url: tcp://localhost:3681
   dist_backend: 'nccl'
