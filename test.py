@@ -76,7 +76,7 @@ def main():
     if args.log_model:
         logger.info(model)
 
-    args.model_dir = os.path.join("pretrain", "cris_best.pth")
+    args.model_dir = args.resume
     if os.path.isfile(args.model_dir):
         logger.info("=> loading checkpoint '{}'".format(args.model_dir))
         checkpoint = torch.load(args.model_dir)

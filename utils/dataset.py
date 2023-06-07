@@ -40,7 +40,7 @@ info = {
     "etis_polyp_10_0_90": {"train": 0, "val": 20, "testA": 176, "testB": 176},
     "isic_skin_90_10_d": {"train": 800, "val": 100, "testA": 379, "testB": 379},
     "camus_80_10_10": {"train": 4320, "val": 540, "testA": 540, "testB": 540},
-    "chexlocalize_no_train": {"train": 1330, "val": 420, "testA": 427, "testB": 427},
+    "chexlocalize_no_train": {"train": 1279, "val": 446, "testA": 452, "testB": 452}
 }
 _tokenizer = _Tokenizer()
 

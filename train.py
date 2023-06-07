@@ -178,7 +178,7 @@ def main_worker(gpu, args):
                 args.resume, map_location="cuda"
             )  # lambda storage: storage.cuda())
             args.start_epoch = checkpoint["epoch"]
-            best_IoU = checkpoint["best_iou"]
+            # best_IoU = checkpoint["best_iou"]
             model.load_state_dict(checkpoint["state_dict"])
 
             if args.resume_optimizer:
