@@ -113,6 +113,7 @@ def main_worker(gpu, args):
         param_list, lr=args.base_lr, weight_decay=args.weight_decay
     )
     scheduler = MultiStepLR(optimizer, milestones=args.milestones, gamma=args.lr_decay)
+
     scaler = amp.GradScaler()
 
     # build dataset

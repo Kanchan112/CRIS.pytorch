@@ -1,3 +1,4 @@
+import ast
 import os
 from typing import List, Union
 
@@ -38,9 +39,15 @@ info = {
     "cvc300_polyp_33_0_67": {"train": 0, "val": 20, "testA": 40, "testB": 40},
     "cvccolondb_polyp_51_0_949": {"train": 0, "val": 20, "testA": 360, "testB": 360},
     "etis_polyp_10_0_90": {"train": 0, "val": 20, "testA": 176, "testB": 176},
-    "isic_skin_90_10_d": {"train": 800, "val": 100, "testA": 379, "testB": 379},
     "camus_80_10_10": {"train": 4320, "val": 540, "testA": 540, "testB": 540},
-    "chexlocalize_no_train": {"train": 1279, "val": 446, "testA": 452, "testB": 452}
+    "chexlocalize_no_train": {"train": 1330, "val": 420, "testA": 427, "testB": 427},
+    "cvc300_polyp_0_0_100": {"train": 0, "val": 0, "testA": 60, "testB": 60},
+    "cvccolondb_polyp_0_0_100": {"train": 0, "val": 0, "testA": 380, "testB": 380},
+    "etis_polyp_0_0_100": {"train": 0, "val": 0, "testA": 196, "testB": 196},
+    "dfu-2022_80_10_10": {"train": 1600, "val": 200, "testA": 200, "testB": 200},
+    "isic_90_10_d": {"train": 810, "val": 90, "testA": 379, "testB": 379},
+    "endoscopy_all": {"train": 2090, "val": 261, "testA": 897, "testB": 897},
+    "all_combined": {"train": 10723, "val": 1615, "testA": 2546, "testB": 2546},
 }
 _tokenizer = _Tokenizer()
 
@@ -134,7 +141,7 @@ class RefDataset(Dataset):
             meminit=False,
         )
         with self.env.begin(write=False) as txn:
-            self.length = loads_pyarrow(txn.get(b"__len__"))
+            dgth = loads_pyarrow(txn.get(b"__len__"))
             self.keys = loads_pyarrow(txn.get(b"__keys__"))
 
     def __len__(self):
@@ -164,20 +171,26 @@ class RefDataset(Dataset):
         # )
         # sents = ref["sents"]
         # print(ref["sents"]) # edited
-        if (
-            self.prompt_type == "p7"
-            or self.prompt_type == "p8"
-            or self.prompt_type == "p9"
-        ):
-            sents = ref["prompts"][f"{self.prompt_type}"]
-            # if type(sents) != list:
-            #    sents = list(sents)
+        # if (
+        #     self.prompt_type == "p7"
+        #     or self.prompt_type == "p8"
+        #     or self.prompt_type == "p9"
+        # ):
+        sents = ref["prompts"][f"{self.prompt_type}"]
+
+        assert type(sents) == list or type(sents) == str, "should be list or string"
+
+        if type(sents) != list:
+            sents = [sents]
         else:
-            sents = [str(ref["prompts"][f"{self.prompt_type}"])]  # edited
+            sents = ref["prompts"][f"{self.prompt_type}"]  # edited
             if len(sents) == 0:  # edited
                 sents = [""]  # edited
             # print(ref["prompts"][f"{self.prompt_type}"] == "")  # edited
 
+        # if type(sents) != "list"
+        # print(sents, type(sents))
+        print(sents, type(sents))
         idx = np.random.choice([i for i in range(len(sents))])
         # transform
         mat, mat_inv = self.getTransformMat(img_size, True)
@@ -202,7 +215,7 @@ class RefDataset(Dataset):
             mask = mask / 255.0
             # sentence -> vector
             sent = sents[idx]
-            print(sent)
+
             word_vec = tokenize(sent, self.word_length, True).squeeze(0)
             img, mask = self.convert(img, mask)
             return img, word_vec, mask
