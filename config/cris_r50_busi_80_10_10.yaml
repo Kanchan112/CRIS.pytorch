@@ -1,10 +1,10 @@
 DATA:
-  dataset:  camus_80_10_10 #dataset name
-  train_lmdb: /mnt/Enterprise/rabin/VLM-SEG-2023/CRIS.pytorch/datasets/lmdb/camus_80_10_10/train.lmdb #path to train.lmdb for the dataset
+  dataset:  busi_80_10_10 #dataset name
+  train_lmdb: /mnt/Enterprise/rabin/VLM-SEG-2023/CRIS.pytorch/datasets/lmdb/busi_80_10_10/train.lmdb #path to train.lmdb for the dataset
   train_split: train
-  val_lmdb: /mnt/Enterprise/rabin/VLM-SEG-2023/CRIS.pytorch/datasets/lmdb/camus_80_10_10/val.lmdb #path to val.lmdb for the dataset
+  val_lmdb: /mnt/Enterprise/rabin/VLM-SEG-2023/CRIS.pytorch/datasets/lmdb/busi_80_10_10/val.lmdb #path to val.lmdb for the dataset
   val_split: val
-  mask_root: /mnt/Enterprise/rabin/VLM-SEG-2023/CRIS.pytorch/datasets/masks/camus_80_10_10/ #path to masks for the dataset
+  mask_root: /mnt/Enterprise/rabin/VLM-SEG-2023/CRIS.pytorch/datasets/masks/busi_80_10_10/ #path to masks for the dataset
 TRAIN:
   # Base Arch
   clip_pretrain: pretrain/RN50.pt
@@ -39,7 +39,7 @@ TRAIN:
   prompt_type: p0 # one of p0, ..., p1
   # Resume & Save
   exp_name: CRIS_R50
-  output_folder: exp/camus_80_10_10_p0_i #path to logs and checkpoints, preparbly in exp\{dataset}_{prmopt_type}_fn for finetuning exp\{dataset}_{prmopt_type}_i for inference
+  output_folder: exp/busi_80_10_10_p0_i #path to logs and checkpoints, preparbly in exp\{dataset}_{prmopt_type}_fn for finetuning exp\{dataset}_{prmopt_type}_i for inference
   save_freq: 1
   weight:  # path to initial weight (default: none)
   resume: pretrain/cris_best.pth # path to latest checkpoint (default: none)
@@ -49,7 +49,7 @@ TRAIN:
   resize: False
   log_model: False
 Distributed:
-  dist_url: tcp://localhost:3981
+  dist_url: tcp://localhost:4991
   dist_backend: 'nccl'
   multiprocessing_distributed: True
   world_size: 1
