@@ -39,9 +39,7 @@ info = {
     "cvc300_polyp_33_0_67": {"train": 0, "val": 20, "testA": 40, "testB": 40},
     "cvccolondb_polyp_51_0_949": {"train": 0, "val": 20, "testA": 360, "testB": 360},
     "etis_polyp_10_0_90": {"train": 0, "val": 20, "testA": 176, "testB": 176},
-    "isic_skin_90_10_d": {"train": 800, "val": 100, "testA": 379, "testB": 379},
     "camus_80_10_10": {"train": 4320, "val": 540, "testA": 540, "testB": 540},
-    "busi_80_10_10": {"train": 624, "val": 78, "testA": 78, "testB": 78},
     "chexlocalize_no_train": {"train": 1330, "val": 420, "testA": 427, "testB": 427},
     "cvc300_polyp_0_0_100": {"train": 0, "val": 0, "testA": 60, "testB": 60},
     "cvccolondb_polyp_0_0_100": {"train": 0, "val": 0, "testA": 380, "testB": 380},
@@ -177,22 +175,33 @@ class RefDataset(Dataset):
         #     self.prompt_type == "p7"
         #     or self.prompt_type == "p8"
         #     or self.prompt_type == "p9"
+
         # ):
-        sents = ref["prompts"][f"{self.prompt_type}"]
+        # print("&&", self.prompt_type)
+        prompt_type = ""
+
+        if self.prompt_type == "random":
+            prompt_type_list = list(ref["prompts"].keys())
+            prompt_type = np.random.choice(prompt_type_list)
+        else:
+            prompt_type = self.prompt_type
+
+        # print("*", prompt_type)
+
+        sents = ref["prompts"][f"{prompt_type}"]
 
         assert type(sents) == list or type(sents) == str, "should be list or string"
 
         if type(sents) != list:
             sents = [sents]
         else:
-            sents = ref["prompts"][f"{self.prompt_type}"]  # edited
+            sents = ref["prompts"][f"{prompt_type}"]  # edited
             if len(sents) == 0:  # edited
                 sents = [""]  # edited
             # print(ref["prompts"][f"{self.prompt_type}"] == "")  # edited
 
         # if type(sents) != "list"
         # print(sents, type(sents))
-        print(sents, type(sents))
         idx = np.random.choice([i for i in range(len(sents))])
         # transform
         mat, mat_inv = self.getTransformMat(img_size, True)
@@ -217,13 +226,13 @@ class RefDataset(Dataset):
             mask = mask / 255.0
             # sentence -> vector
             sent = sents[idx]
+
             word_vec = tokenize(sent, self.word_length, True).squeeze(0)
             img, mask = self.convert(img, mask)
             return img, word_vec, mask
         elif self.mode == "val":
             # sentence -> vector
             sent = sents[0]
-            # print("val", sent)
             word_vec = tokenize(sent, self.word_length, True).squeeze(0)
             img = self.convert(img)[0]
             params = {
