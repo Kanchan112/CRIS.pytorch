@@ -14,8 +14,8 @@ class CRIS(nn.Module):
 
         self.backbone = build_model(clip_model.state_dict(), cfg.word_len).float()
 
-        # make backbone not trainable
-        self.backbone.requires_grad_(False)
+        # freezing
+        self.backbone.requires_grad_(cfg.train_clip)
 
         # Multi-Modal FPN
         self.neck = FPN(in_channels=cfg.fpn_in, out_channels=cfg.fpn_out)
