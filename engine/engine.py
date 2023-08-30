@@ -178,6 +178,7 @@ def inference(test_loader, model, args):
         # data
         img = img.cuda(non_blocking=True)
         mask = cv2.imread(param["mask_dir"][0], flags=cv2.IMREAD_GRAYSCALE)
+
         # resize
         h_, w_ = mask.shape
         if args.resize:
@@ -198,9 +199,19 @@ def inference(test_loader, model, args):
             )
             if args.resize:
                 mask = cv2.resize(mask, (h_, w_))
-            cv2.imwrite(filename=os.path.join(args.vis_dir, mask_name), img=mask)
+
+            output_filename = os.path.join(args.vis_dir, mask_name)
+
+            os.makedirs(output_filename.rsplit("/", 1)[0], exist_ok=True)
+
+            cv2.imwrite(filename=output_filename, img=mask)
+
+            output_filename = os.path.join(args.gt_dir, "{}.png".format(seg_id))
+
+            os.makedirs(output_filename.rsplit("/", 1)[0], exist_ok=True)
+
             cv2.imwrite(
-                filename=os.path.join(args.gt_dir, "{}.png".format(seg_id)), img=mask
+                filename=output_filename, img=mask
             )
         # multiple sentences
         for sent in param["sents"]:
@@ -232,9 +243,17 @@ def inference(test_loader, model, args):
                 pred = np.array(pred * 255, dtype=np.uint8)
                 sent = "_".join(sent[0].split(" "))
                 pred_name = "{}-iou={:.2f}-{}.png".format(seg_id, iou * 100, sent)
-                cv2.imwrite(filename=os.path.join(args.vis_dir, pred_name), img=pred)
+
+                output_filename = os.path.join(args.vis_dir, pred_name)
+
+                os.makedirs(output_filename.rsplit("/", 1)[0], exist_ok=True)
+
+                cv2.imwrite(filename=output_filename, img=pred)
+
+                output_filename = os.path.join(args.pred_dir, "{}.png".format(seg_id))
+                os.makedirs(output_filename.rsplit("/", 1)[0], exist_ok=True)
                 cv2.imwrite(
-                    filename=os.path.join(args.pred_dir, "{}.png".format(seg_id)),
+                    filename=output_filename,
                     img=pred,
                 )
     logger.info("=> Metric Calculation <=")

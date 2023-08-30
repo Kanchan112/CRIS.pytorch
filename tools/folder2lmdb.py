@@ -20,6 +20,7 @@ def loads_pyarrow(buf):
 
 
 def raw_reader(path):
+    assert osp.exists(path), f"{path} doesn't exist"
     with open(path, "rb") as f:
         bin_data = f.read()
     return bin_data
@@ -53,9 +54,8 @@ def folder2lmdb(json_data, img_dir, mask_dir, output_dir, split, write_frequency
     for idx, item in enumerate(tbar):
         img = raw_reader(osp.join(img_dir, item['img_name']))
         mask = raw_reader(osp.join(mask_dir, item['mask_name']))
-        data = {'img': img, 'mask': mask, 'cat': item['cat'],
+        data = {'img': img, 'mask': mask,
                 'mask_name': item['mask_name'], 'img_name': item['img_name'],
-                'num_sents': item['sentences_num'], 'sents': [i['sent'] for i in item['sentences']],
             "prompts": item["prompts"]}  # edited
         txn.put(u'{}'.format(idx).encode('ascii'), dumps_pyarrow(data))
         if idx % write_frequency == 0:

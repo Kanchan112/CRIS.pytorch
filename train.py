@@ -258,7 +258,7 @@ def main_worker(gpu, args):
 
         # update lr
         scheduler.step(epoch_log)
-        torch.cuda.empty_cache()
+        # torch.cuda.empty_cache()
 
     time.sleep(2)
     if dist.get_rank() == 0:
